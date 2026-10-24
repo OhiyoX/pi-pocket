@@ -1,0 +1,42 @@
+name: Public checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Syntax checks
+        run: |
+          node --check termux/pi-pocket-bridge.mjs
+          node --check termux/rpc-channel.mjs
+          node --check termux/event-stream.mjs
+          node --check termux/notify-payload.mjs
+          node --check tools/mock-bridge.mjs
+          node --check demo/assets/landing.js
+          node --check script/check-htmlvisual-js.mjs
+
+      - name: Node tests
+        run: node --test script/*.test.mjs tools/mock-profile.test.mjs
+
+      - name: Demo sanity
+        run: |
+          test -f demo/index.html
+          test -f demo/demo.html
+          test -f demo/screenshots/01-sessions-dark.png
+          test -f demo/screenshots/09-sessions-light.png

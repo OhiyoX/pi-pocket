@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pocket Pi — a local-first Android client for pi</title>
+<meta name="description" content="Pocket Pi is an Android client for pi running inside Termux on the same phone, or on any LAN/Tailscale host. Terminal-parity chat, streaming tools, multi-machine switching and SSH wake-up.">
+<meta property="og:title" content="Pocket Pi — your agent, in your pocket">
+<meta property="og:description" content="A local-first Android client for pi. Native Compose UI over a Termux HTTP + SSE bridge. No cloud relay.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#08090c">
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body class="site-page" data-title-en="Pocket Pi — a local-first Android client for pi" data-title-zh="Pocket Pi — 本地优先的 pi Android 客户端">
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+<a class="skip" href="#main">Skip to content</a>
+
+<nav class="site-nav" aria-label="Main">
+  <div class="wrap nav-inner">
+    <a class="brand" href="index.html">
+      <img src="assets/logo.svg" alt="">
+      <span>Pocket Pi</span>
+      <span class="version">v0.4.4</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features"><span class="i18n-en">Features</span><span class="i18n-zh">功能</span></a>
+      <a href="demo.html"><span class="i18n-en">Screenshot tour</span><span class="i18n-zh">截图导览</span></a>
+      <a href="#architecture"><span class="i18n-en">Architecture</span><span class="i18n-zh">架构</span></a>
+      <a href="#install"><span class="i18n-en">Install</span><span class="i18n-zh">安装</span></a>
+      <button class="lang-toggle" id="langToggle" type="button" aria-label="切换到中文"><span id="langToggleLabel">中文</span></button>
+      <button class="icon-button" id="siteTheme" type="button" aria-label="Switch theme">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z"/></svg>
+      </button>
+      <a class="nav-cta" href="https://github.com/OhiyoX/pi-pocket" rel="noopener">GitHub ↗</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main"><span id="top"></span>
+
+  <!-- ================= HERO ================= -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="kicker"><span class="i18n-en">Independent client for pi · Android + Termux</span><span class="i18n-zh">pi 的独立客户端 · Android + Termux</span></p>
+        <div class="badges">
+          <span class="pill"><span class="dot"></span><span class="i18n-en">Local-first</span><span class="i18n-zh">本地优先</span></span>
+          <span class="pill purple"><span class="dot"></span>Kotlin · Compose</span>
+          <span class="pill amber"><span class="dot"></span>Android 9+</span>
+          <span class="pill"><span class="dot"></span>MIT</span>
+        </div>
+        <h1>
+          <span class="i18n-en">Your agent,<br><span class="grad">in your pocket.</span></span>
+          <span class="i18n-zh">你的 Agent，<br><span class="grad">就在口袋里。</span></span>
+        </h1>
+        <p class="lead i18n-en">Pocket Pi is an Android client for <strong>pi</strong> running inside Termux on the same phone — or on any machine you can reach over LAN or Tailscale.</p>
+        <p class="lead i18n-zh">Pocket Pi 是 <strong>pi</strong> 的 Android 客户端：pi 跑在同一台手机的 Termux 里，也可以连局域网或 Tailscale 上的任意机器。</p>
+        <p class="i18n-en">No remote desktop. No cloud relay. A native Compose interface talks HTTP + SSE to a small bridge that drives <code>pi --mode rpc</code> and keeps a real session on disk.</p>
+        <p class="i18n-zh">不是远程桌面，也没有云中转。原生 Compose 界面通过 HTTP + SSE 连接一个小桥；桥驱动 <code>pi --mode rpc</code>，并把真实会话留在磁盘上。</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="demo.html">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="3"/><path d="M10 18h4"/></svg>
+            <span class="i18n-en">Open the screenshot tour</span><span class="i18n-zh">打开截图导览</span>
+          </a>
+          <a class="btn btn-ghost" href="https://github.com/OhiyoX/pi-pocket" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-2.8 17.5c.5.1.6-.2.6-.5v-1.8c-2.5.5-3-1.2-3-1.2-.4-1-1-1.3-1-1.3-.8-.6.1-.6.1-.6.9.1 1.4.9 1.4.9.8 1.4 2.1 1 2.6.8.1-.6.3-1 .6-1.2-2-.2-4.1-1-4.1-4.5 0-1 .4-1.8 1-2.5-.1-.2-.4-1.2.1-2.5 0 0 .8-.3 2.6 1a9 9 0 0 1 4.8 0c1.8-1.3 2.6-1 2.6-1 .5 1.3.2 2.3.1 2.5.6.7 1 1.5 1 2.5 0 3.5-2.1 4.3-4.1 4.5.3.3.6.8.6 1.7V20c0 .3.2.6.6.5A9 9 0 0 0 12 3Z"/></svg>
+            <span class="i18n-en">View source</span><span class="i18n-zh">查看源码</span>
+          </a>
+        </div>
+        <div class="stat-row">
+          <div class="stat"><b>0</b><span class="i18n-en">cloud relays</span><span class="i18n-zh">云中转</span></div>
+          <div class="stat"><b>1:1</b><span class="i18n-en">terminal Markdown</span><span class="i18n-zh">终端 Markdown</span></div>
+          <div class="stat"><b>3</b><span class="i18n-en">connect paths: loopback · LAN · Tailscale</span><span class="i18n-zh">连接路径：本机 · 局域网 · Tailscale</span></div>
+        </div>
+      </div>
+
+      <figure class="phone-figure">
+        <div class="screen"><img src="screenshots/02-chat-markdown.png" alt="Pocket Pi chat with terminal-parity Markdown" width="720" height="1600"></div>
+        <figcaption><span class="i18n-en">Android build · synthetic session</span><span class="i18n-zh">Android 实机截图 · 合成会话</span></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ================= FEATURES ================= -->
+  <section class="section" id="features">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow"><span class="i18n-en">Why another client</span><span class="i18n-zh">为什么再做一个客户端</span></p>
+        <h2>
+          <span class="i18n-en">The terminal is the engine.<br>The phone is the interface.</span>
+          <span class="i18n-zh">终端是引擎，<br>手机是界面。</span>
+        </h2>
+        <p class="i18n-en">Pocket Pi does not reimplement the agent. It gives pi a native mobile surface while keeping sessions, tools and prompts in the same place they already live.</p>
+        <p class="i18n-zh">Pocket Pi 不重写 Agent，只给 pi 一个原生手机界面；会话、工具与提示词仍留在原来的位置。</p>
+      </div>
+
+      <div class="feature-grid">
+        <article class="feature">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="3"/><path d="M10 18h4"/></svg></div>
+          <h3><span class="i18n-en">Runs on the phone</span><span class="i18n-zh">就在手机里跑</span></h3>
+          <p class="i18n-en">Termux hosts the bridge and a real <code>pi</code> process. The app connects to <code>127.0.0.1</code> — no laptop in the loop.</p>
+          <p class="i18n-zh">Termux 承载桥和真正的 <code>pi</code> 进程，app 连接 <code>127.0.0.1</code>，不需要一台电脑中转。</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h13"/></svg></div>
+          <h3><span class="i18n-en">Terminal-parity render</span><span class="i18n-zh">终端口径渲染</span></h3>
+          <p class="i18n-en">Amber headings, purple inline code, blue links, green tool blocks and square tables — measured against the pi TUI, not invented.</p>
+          <p class="i18n-zh">琥珀标题、紫色行内码、蓝色链接、绿色工具块与方角表格——对照 pi 终端实测，而不是凭空设计。</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg></div>
+          <h3><span class="i18n-en">Built for long turns</span><span class="i18n-zh">为长回合设计</span></h3>
+          <p class="i18n-en">Streaming deltas, collapsible thinking, live tool state, steer or queue while running, stop at any point, auto-reconnect.</p>
+          <p class="i18n-zh">流式增量、可折叠思考、工具实时状态；运行中可 steer 或排队，随时停止，断线自动重连。</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="8" height="6" rx="2"/><rect x="13" y="14" width="8" height="6" rx="2"/><path d="M7 10v4h10"/></svg></div>
+          <h3><span class="i18n-en">Many machines, one list</span><span class="i18n-zh">多台机器，一个列表</span></h3>
+          <p class="i18n-en">Detect loopback, this subnet and saved hosts. Merge LAN and Tailscale entries for one machine, remember the best path, wake a sleeping host over SSH.</p>
+          <p class="i18n-zh">自动探测本机、当前网段与已保存主机；同一台机器的局域网/Tailscale 入口合并成一条，记住最优路径，还能通过 SSH 唤醒休眠主机。</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></div>
+          <h3><span class="i18n-en">Session workspace</span><span class="i18n-zh">会话工作区</span></h3>
+          <p class="i18n-en">Group by project directory, sort by updated, created or name, filter by time and project, inspect a session tree and watch the context ring.</p>
+          <p class="i18n-zh">按项目目录分组，按更新/创建/名称排序，按时间与项目过滤；可看会话树，也有上下文环。</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 9l3 3-3 3M13 15h4"/></svg></div>
+          <h3><span class="i18n-en">Shell and files included</span><span class="i18n-zh">自带 Shell 与文件</span></h3>
+          <p class="i18n-en">Run commands on the connected machine through the bridge, read files and images, answer extension prompts inline without losing the conversation.</p>
+          <p class="i18n-zh">通过桥在已连接机器上执行命令，查看文件与图片；扩展交互请求就地应答，不打断对话。</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= DEMO ================= -->
+  <section class="section" id="demo">
+    <div class="wrap">
+      <div class="demo-callout">
+        <div>
+          <p class="eyebrow"><span class="i18n-en">No install required</span><span class="i18n-zh">无需安装</span></p>
+          <h2><span class="i18n-en">See every screen,<br>one by one.</span><span class="i18n-zh">逐屏看清<br>每个界面。</span></h2>
+          <p class="i18n-en">A static screenshot tour captured from the Android build against a local mock bridge. No install, no bridge, no model.</p>
+          <p class="i18n-zh">从 Android 构建实拍的静态截图导览，连接本地假桥；不用安装、不用起桥、不调用模型。</p>
+          <ul class="check-list i18n-en">
+            <li>Sessions, chat, tool cards and Markdown</li>
+            <li>Context usage and slash commands</li>
+            <li>Machine switching, shell and light theme</li>
+          </ul>
+          <ul class="check-list i18n-zh">
+            <li>会话列表、对话、工具卡与 Markdown</li>
+            <li>上下文用量与斜杠命令</li>
+            <li>机器切换、Shell 与浅色主题</li>
+          </ul>
+          <div class="hero-actions" style="margin-bottom:0">
+            <a class="btn btn-primary" href="demo.html"><span class="i18n-en">Open the screenshot tour</span><span class="i18n-zh">打开截图导览</span></a>
+            <a class="btn btn-ghost" href="https://github.com/OhiyoX/pi-pocket/tree/main/demo" rel="noopener"><span class="i18n-en">Demo source</span><span class="i18n-zh">Demo 源码</span></a>
+          </div>
+        </div>
+        <figure class="phone-figure">
+          <div class="screen"><img src="screenshots/03-tool-cards.png" alt="Tool cards with success, failure and file results" width="720" height="1600" loading="lazy"></div>
+          <figcaption><span class="i18n-en">Tools + Markdown · Android build</span><span class="i18n-zh">工具卡 + Markdown · Android 实拍</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SCREENS ================= -->
+  <section class="section" id="screens">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow"><span class="i18n-en">Screens</span><span class="i18n-zh">界面</span></p>
+        <h2><span class="i18n-en">Native Compose, terminal manners.</span><span class="i18n-zh">原生 Compose，终端规矩。</span></h2>
+        <p class="i18n-en">Captured from the Android build against a local mock bridge. Names, paths and conversations are synthetic.</p>
+        <p class="i18n-zh">由 Android 构建实拍，连接本地假桥；名称、路径与会话内容均为合成。</p>
+      </div>
+      <div class="gallery">
+        <figure class="shot">
+          <a href="demo.html#screen-01"><img src="screenshots/01-sessions-dark.png" alt="Session list grouped by project directory" loading="lazy" width="720" height="1600"></a>
+          <figcaption><b><span class="i18n-en">Sessions by project</span><span class="i18n-zh">按项目分组的会话</span></b><span class="num">01</span></figcaption>
+        </figure>
+        <figure class="shot">
+          <a href="demo.html#screen-03"><img src="screenshots/03-tool-cards.png" alt="Tool cards with success and failure states" loading="lazy" width="720" height="1600"></a>
+          <figcaption><b><span class="i18n-en">Tools and Markdown</span><span class="i18n-zh">工具卡与 Markdown</span></b><span class="num">03</span></figcaption>
+        </figure>
+        <figure class="shot">
+          <a href="demo.html#screen-07"><img src="screenshots/07-machines.png" alt="Machine picker with bridge and Termux actions" loading="lazy" width="720" height="1600"></a>
+          <figcaption><b><span class="i18n-en">Machine picker</span><span class="i18n-zh">机器选择</span></b><span class="num">07</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ARCHITECTURE ================= -->
+  <section class="section" id="architecture">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow"><span class="i18n-en">Architecture</span><span class="i18n-zh">架构</span></p>
+        <h2><span class="i18n-en">One bridge. One session file. No proprietary store.</span><span class="i18n-zh">一个桥，一份会话文件，不锁进专有存储。</span></h2>
+        <p class="i18n-en">The app is a client. The bridge is a transport. pi remains the agent, and its JSONL sessions remain the source of truth.</p>
+        <p class="i18n-zh">app 是客户端，桥是传输层；pi 仍是 Agent，JSONL 会话文件仍是唯一事实来源。</p>
+      </div>
+      <div class="arch">
+        <div class="arch-row">
+          <div class="arch-box hot"><b>Pocket Pi app</b><span>Kotlin · Compose · Material 3</span></div>
+          <div class="arch-arrow">⇄</div>
+          <div class="arch-box"><b><span class="i18n-en">Termux bridge</span><span class="i18n-zh">Termux 桥</span></b><span>Node · HTTP + SSE</span></div>
+        </div>
+        <div class="arch-row">
+          <div class="arch-box"><b>pi --mode rpc</b><span>JSONL over stdio</span></div>
+          <div class="arch-arrow">⇄</div>
+          <div class="arch-box"><b>~/.pi/agent/sessions</b><span class="i18n-en">one JSONL per session</span><span class="i18n-zh">每个会话一个 JSONL</span></div>
+        </div>
+        <p class="arch-note i18n-en">The bridge can also live on a LAN or Tailscale host. The app probes loopback first, then the current /24, then saved machines. If the bridge is down, the app can SSH in and start it.</p>
+        <p class="arch-note i18n-zh">桥也可以跑在局域网或 Tailscale 主机上。app 先探测本机，再扫当前 /24，最后试已保存机器；桥没起时可以 SSH 进去拉起。</p>
+      </div>
+
+      <table class="proto-table" style="margin-top:22px">
+        <thead><tr><th>Endpoint</th><th><span class="i18n-en">Purpose</span><span class="i18n-zh">用途</span></th></tr></thead>
+        <tbody>
+          <tr><td>GET /v1/health</td><td><span class="i18n-en">Host, version, uptime and bridge identity</span><span class="i18n-zh">主机、版本、运行时长与桥身份</span></td></tr>
+          <tr><td>GET /v1/sessions</td><td><span class="i18n-en">Session files with project directory and size</span><span class="i18n-zh">会话文件、项目目录与大小</span></td></tr>
+          <tr><td>POST /v1/sessions/open · new</td><td><span class="i18n-en">Attach to an existing session or start a fresh worker</span><span class="i18n-zh">接入已有会话，或新建一个 worker</span></td></tr>
+          <tr><td>GET /v1/messages</td><td><span class="i18n-en">Read the transcript for the current session</span><span class="i18n-zh">读取当前会话的完整转录</span></td></tr>
+          <tr><td>POST /v1/prompt</td><td><span class="i18n-en">Send a prompt, optionally with base64 images</span><span class="i18n-zh">发送提示词，可附带 base64 图片</span></td></tr>
+          <tr><td>POST /v1/abort</td><td><span class="i18n-en">Stop the running turn without killing the session</span><span class="i18n-zh">停止当前回合，不杀会话</span></td></tr>
+          <tr><td>GET /v1/events</td><td><span class="i18n-en">Server-sent events: deltas, tools, thinking, status</span><span class="i18n-zh">SSE：增量、工具、思考与状态</span></td></tr>
+          <tr><td>POST /v1/bash</td><td><span class="i18n-en">Run a command on the connected host</span><span class="i18n-zh">在已连接主机上执行命令</span></td></tr>
+          <tr><td>GET /v1/info · models · commands</td><td><span class="i18n-en">Model, context, slash commands and capabilities</span><span class="i18n-zh">模型、上下文、斜杠命令与能力</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= INSTALL ================= -->
+  <section class="section" id="install">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow"><span class="i18n-en">Quick start</span><span class="i18n-zh">快速开始</span></p>
+        <h2><span class="i18n-en">Bridge in Termux, build the app.</span><span class="i18n-zh">在 Termux 起桥，构建 app。</span></h2>
+        <p class="i18n-en">Prerequisites: Termux with Node 20+, a working <code>pi</code> install, and an Android SDK for the APK. The app is debug-signed; there is no store release yet.</p>
+        <p class="i18n-zh">前置条件：Termux 与 Node 20+、可用的 <code>pi</code>、以及用于打包的 Android SDK。app 目前是 debug 签名，尚未上架商店。</p>
+      </div>
+      <div class="quick-grid">
+        <div class="code-card">
+          <div class="code-head"><span><span class="i18n-en">1 · Termux bridge</span><span class="i18n-zh">1 · Termux 桥</span></span><button class="copy" type="button" data-copy="code-termux"><span class="i18n-en">Copy</span><span class="i18n-zh">复制</span></button></div>
+          <pre id="code-termux"><span class="c"># inside Termux</span>
+pkg install nodejs git
+git clone https://github.com/OhiyoX/pi-pocket.git
+<span class="k">cd</span> pi-pocket
+./termux/install.sh
+termux-wake-lock
+nohup pi-pocket-bridge &gt;&gt; ~/.pi/agent/pi-pocket-bridge.log 2&gt;&amp;1 &amp;
+
+<span class="c"># verify</span>
+curl -s localhost:8789/v1/health</pre>
+        </div>
+        <div class="code-card">
+          <div class="code-head"><span><span class="i18n-en">2 · Android app</span><span class="i18n-zh">2 · Android app</span></span><button class="copy" type="button" data-copy="code-app"><span class="i18n-en">Copy</span><span class="i18n-zh">复制</span></button></div>
+          <pre id="code-app"><span class="c"># on the build machine</span>
+./gradlew :app:testDebugUnitTest :app:assembleDebug
+
+<span class="c"># install on a connected device</span>
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+
+<span class="c"># first launch: allow Termux RUN_COMMAND</span>
+<span class="c"># Termux ~/.termux/termux.properties</span>
+allow-external-apps=true</pre>
+        </div>
+      </div>
+      <p class="capture-note">
+        <span class="i18n-en">Remote host? Start the bridge with <code>PI_POCKET_HOST=0.0.0.0</code> and a token, then add the URL or the SSH target in the machine sheet. The app pins the host key on first connect.</span>
+        <span class="i18n-zh">连远端？用 <code>PI_POCKET_HOST=0.0.0.0</code> 和 token 启动桥，然后在机器面板里填 URL 或 SSH 目标；首次连接会固定主机密钥。</span>
+      </p>
+    </div>
+  </section>
+
+  <!-- ================= SECURITY ================= -->
+  <section class="section" id="security">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow"><span class="i18n-en">Security and limits</span><span class="i18n-zh">安全与边界</span></p>
+        <h2><span class="i18n-en">Small surface, stated plainly.</span><span class="i18n-zh">边界写清楚，不夸大。</span></h2>
+        <p class="i18n-en">Pocket Pi is designed for a personal device and a trusted network. These are the boundaries the current build actually enforces.</p>
+        <p class="i18n-zh">Pocket Pi 面向个人设备与可信网络；以下是当前构建真实执行的边界。</p>
+      </div>
+      <div class="security-grid">
+        <div>
+          <ul class="security-list i18n-en">
+            <li>Loopback by default; a non-loopback bind refuses to start without <code>PI_POCKET_TOKEN</code>.</li>
+            <li>SSH host keys are pinned on first connect; a changed key is rejected.</li>
+            <li>The bridge only transports and attributes events. It does not proxy model traffic through a third party.</li>
+            <li>No analytics, no telemetry, no cloud relay. This Pages site makes no external requests.</li>
+            <li class="warn">Current builds are debug-signed. Treat the APK as a development artifact, not a store release.</li>
+            <li class="warn">Tokens and SSH credentials live in app preferences unencrypted. Use a device lock and a dedicated token.</li>
+            <li class="warn">Android loopback is not an app isolation boundary: another app on the same device can reach the bridge. Set a token if that matters.</li>
+          </ul>
+          <ul class="security-list i18n-zh">
+            <li>默认只绑回环；非回环绑定没有 <code>PI_POCKET_TOKEN</code> 会拒绝启动。</li>
+            <li>SSH 主机密钥首次连接即固定，之后密钥变化会拒绝连接。</li>
+            <li>桥只搬运并归属事件，不把模型流量转给第三方。</li>
+            <li>无统计、无遥测、无云中转；这个 Pages 站点不请求任何外部资源。</li>
+            <li class="warn">当前构建是 debug 签名，请当作开发产物，不是商店发布版。</li>
+            <li class="warn">token 与 SSH 凭据存在 app prefs 里，未加密；请使用设备锁和专用 token。</li>
+            <li class="warn">Android 的回环不是应用隔离边界：同机其它 app 也能连桥。介意就设 token。</li>
+          </ul>
+        </div>
+        <div class="status-card">
+          <h3><span class="i18n-en">Project status</span><span class="i18n-zh">项目状态</span></h3>
+          <p class="i18n-en">This repository is a sanitized public snapshot. Development, issues and reviews happen in a private upstream; the public repo receives reviewed snapshots.</p>
+          <p class="i18n-zh">本仓是脱敏后的公开快照；开发、Issue 与评审在私有上游完成，公开仓只接收已审核快照。</p>
+          <div class="status-line"><span><span class="i18n-en">Version</span><span class="i18n-zh">版本</span></span><span>0.4.4 · code 23</span></div>
+          <div class="status-line"><span><span class="i18n-en">Min Android</span><span class="i18n-zh">最低 Android</span></span><span>9 · API 28</span></div>
+          <div class="status-line"><span><span class="i18n-en">Target</span><span class="i18n-zh">目标版本</span></span><span>API 36</span></div>
+          <div class="status-line"><span><span class="i18n-en">Bridge</span><span class="i18n-zh">桥</span></span><span>Node 20+ · no deps</span></div>
+          <div class="status-line"><span><span class="i18n-en">License</span><span class="i18n-zh">许可证</span></span><span>MIT</span></div>
+          <div class="status-line"><span><span class="i18n-en">Snapshot</span><span class="i18n-zh">快照</span></span><span>2026-10-25</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div>
+      <span class="i18n-en">Pocket Pi is an independent client for <a href="https://pi.dev" rel="noopener">pi</a>. Built for a phone that happens to be a workstation.</span>
+      <span class="i18n-zh">Pocket Pi 是 <a href="https://pi.dev" rel="noopener">pi</a> 的独立客户端，为“恰好也是工作站的手机”而做。</span>
+    </div>
+    <div class="footer-links">
+      <a href="demo.html"><span class="i18n-en">Screenshot tour</span><span class="i18n-zh">截图导览</span></a>
+      <a href="https://github.com/OhiyoX/pi-pocket" rel="noopener">GitHub</a>
+      <a href="https://github.com/OhiyoX/pi-pocket/blob/main/SECURITY.md" rel="noopener"><span class="i18n-en">Security</span><span class="i18n-zh">安全</span></a>
+      <a href="https://github.com/OhiyoX/pi-pocket/blob/main/LICENSE" rel="noopener">MIT</a>
+    </div>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="Image preview">
+  <button class="icon-button lightbox-close" id="lightboxClose" type="button" aria-label="Close image">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+  <img id="lightboxImage" alt="">
+</div>
+
+<script src="assets/landing.js"></script>
+</body>
+</html>

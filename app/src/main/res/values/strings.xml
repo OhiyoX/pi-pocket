@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Pocket Pi</string>
+    <!-- 通知渠道：会话结束/停止 -->
+    <string name="notify_channel_turns">会话完成</string>
+    <string name="notify_channel_turns_desc">会话答完、被停止或出错时提醒你</string>
+    <!-- 后台守护的常驻通知（低优先级、无声；Android 前台服务的硬要求） -->
+    <string name="notify_channel_link">后台连接</string>
+    <string name="notify_channel_link_desc">后台时保持到桥的连接，远端机器的提醒才能送到</string>
+    <string name="notify_link_title">pi-pocket 保持连接中</string>
+</resources>

@@ -1,0 +1,18 @@
+# Gradle / Android
+.gradle/
+build/
+app/build/
+local.properties
+*.iml
+.idea/
+.kotlin/
+
+# Node / Termux
+node_modules/
+*.log
+.dev/prefs.xml
+.dev/
+
+# Python（验证台/脚本的字节码缓存）
+__pycache__/
+*.pyc

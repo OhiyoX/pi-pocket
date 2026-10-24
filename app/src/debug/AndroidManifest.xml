@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 只在 debug 构建里存在的验证探针：让 adb 能在不动屏幕的情况下跑 app 自己的代码路径。 -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity
+            android:name=".EmojiProbeActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|keyboardHidden|uiMode" />
+        <receiver
+            android:name=".DebugProbeReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="id.harness.pipocket.DEBUG_PROBE" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>

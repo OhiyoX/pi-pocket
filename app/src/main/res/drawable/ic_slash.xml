@@ -1,0 +1,11 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24"
+    android:tint="?android:attr/colorControlNormal">
+    <!-- 斜杠（用户口径：命令模式用「斜杆图标」，就是 / 本身，不是 >_） -->
+    <path
+        android:pathData="M15.2,4.2L8.8,19.8"
+        android:strokeColor="#FF000000"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round" />
+</vector>

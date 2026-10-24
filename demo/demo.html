@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pocket Pi — screenshot tour</title>
+<meta name="description" content="A screen-by-screen screenshot tour of Pocket Pi, captured from the Android build against a local mock bridge. All data is synthetic.">
+<meta name="theme-color" content="#08090c">
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body class="site-page" data-title-en="Pocket Pi — screenshot tour" data-title-zh="Pocket Pi — 截图导览">
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+<a class="skip" href="#main">Skip to content</a>
+
+<nav class="site-nav" aria-label="Main">
+  <div class="wrap nav-inner">
+    <a class="brand" href="index.html">
+      <img src="assets/logo.svg" alt="">
+      <span>Pocket Pi</span>
+      <span class="version">v0.4.4</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html"><span class="i18n-en">Home</span><span class="i18n-zh">首页</span></a>
+      <a href="index.html#features"><span class="i18n-en">Features</span><span class="i18n-zh">功能</span></a>
+      <a href="index.html#architecture"><span class="i18n-en">Architecture</span><span class="i18n-zh">架构</span></a>
+      <a href="index.html#install"><span class="i18n-en">Install</span><span class="i18n-zh">安装</span></a>
+      <button class="lang-toggle" id="langToggle" type="button" aria-label="切换到中文"><span id="langToggleLabel">中文</span></button>
+      <button class="icon-button" id="siteTheme" type="button" aria-label="Switch theme">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z"/></svg>
+      </button>
+      <a class="nav-cta" href="https://github.com/OhiyoX/pi-pocket" rel="noopener">GitHub ↗</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="wrap tour-hero">
+    <p class="eyebrow"><span class="i18n-en">Screenshot tour</span><span class="i18n-zh">截图导览</span></p>
+    <h1><span class="i18n-en">Nine screens.<br>No install.</span><span class="i18n-zh">九个界面，<br>无需安装。</span></h1>
+    <p class="i18n-en">Every screenshot below was captured from the Android build running against a local mock bridge. Names, paths, sessions and IPs are synthetic.</p>
+    <p class="i18n-zh">下面每张截图都来自 Android 构建，连接本地假桥实拍；名称、路径、会话与 IP 均为合成数据。</p>
+    <nav class="tour-index" aria-label="Screens">
+      <a href="#screen-01"><span>01</span><span class="i18n-en">Sessions</span><span class="i18n-zh">会话</span></a>
+      <a href="#screen-02"><span>02</span><span class="i18n-en">Chat</span><span class="i18n-zh">对话</span></a>
+      <a href="#screen-03"><span>03</span><span class="i18n-en">Tools</span><span class="i18n-zh">工具卡</span></a>
+      <a href="#screen-04"><span>04</span><span class="i18n-en">Markdown</span><span class="i18n-zh">Markdown</span></a>
+      <a href="#screen-05"><span>05</span><span class="i18n-en">Context</span><span class="i18n-zh">上下文</span></a>
+      <a href="#screen-06"><span>06</span><span class="i18n-en">Commands</span><span class="i18n-zh">命令</span></a>
+      <a href="#screen-07"><span>07</span><span class="i18n-en">Machines</span><span class="i18n-zh">机器</span></a>
+      <a href="#screen-08"><span>08</span><span class="i18n-en">Shell</span><span class="i18n-zh">Shell</span></a>
+      <a href="#screen-09"><span>09</span><span class="i18n-en">Light theme</span><span class="i18n-zh">浅色主题</span></a>
+    </nav>
+  </header>
+
+  <div class="wrap">
+
+    <article class="screen-block" id="screen-01">
+      <figure class="screen-figure">
+        <div class="frame"><img class="zoomable" src="screenshots/01-sessions-dark.png" alt="Pocket Pi session list grouped by project" width="720" height="1600"></div>
+        <figcaption><span class="i18n-en">01 · Sessions, dark theme</span><span class="i18n-zh">01 · 会话列表，深色主题</span></figcaption>
+      </figure>
+      <div class="screen-copy">
+        <span class="num">01</span>
+        <h2><span class="i18n-en">All sessions, grouped by project</span><span class="i18n-zh">所有会话，按项目分组</span></h2>
+        <p class="i18n-en">The list is the workspace: project directories become groups, and each card carries the path, relative time and transcript size. Grouping, sorting, time and project filters are one tap away.</p>
+        <p class="i18n-zh">列表就是工作区：项目目录自动成组，每张卡带路径、相对时间与转录大小；分组、排序、时间和项目筛选都只需一次点击。</p>
+        <ul class="notice-list i18n-en">
+          <li>Group by directory or time bucket</li>
+          <li>Sort by updated, created or name</li>
+          <li>Pinned sessions keep a small amber dot</li>
+          <li>New session asks the bridge for a working directory</li>
+        </ul>
+        <ul class="notice-list i18n-zh">
+          <li>可按目录或时间桶分组</li>
+          <li>可按更新、创建或名称排序</li>
+          <li>固定会话带一个琥珀色小点</li>
+          <li>新建会话时向桥选择工作目录</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="screen-block reverse" id="screen-02">
+      <figure class="screen-figure">
+        <div class="frame"><img class="zoomable" src="screenshots/02-chat-markdown.png" alt="Chat with user blocks, thinking and terminal-style Markdown" width="720" height="1600" loading="lazy"></div>
+        <figcaption><span class="i18n-en">02 · Chat and Markdown</span><span class="i18n-zh">02 · 对话与 Markdown</span></figcaption>
+      </figure>
+      <div class="screen-copy">
+        <span class="num">02</span>
+        <h2><span class="i18n-en">Thinking, tools and answers in one column</span><span class="i18n-zh">思考、工具与回答在同一列</span></h2>
+        <p class="i18n-en">User turns are blue blocks. Thinking is italic grey. Tool calls collapse into green cards. The answer renders in the terminal's Markdown voice, not a generic chat bubble.</p>
+        <p class="i18n-zh">用户消息是深蓝块，思考是灰色斜体，工具调用折叠成绿色卡片；回答按终端的 Markdown 口径渲染，而不是通用聊天气泡。</p>
+        <ul class="notice-list i18n-en">
+          <li>Amber headings; H1 keeps an underline</li>
+          <li>Purple list markers and inline code</li>
+          <li>Thinking collapses to one line and remembers its state</li>
+          <li>The context ring sits above the composer</li>
+        </ul>
+        <ul class="notice-list i18n-zh">
+          <li>标题为琥珀色，H1 带下划线</li>
+          <li>列表符号与行内码为紫色</li>
+          <li>思考可折叠成一行，并记住展开状态</li>
+          <li>上下文环固定在输入区上方</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="screen-block" id="screen-03">
+      <figure class="screen-figure">
+        <div class="frame"><img class="zoomable" src="screenshots/03-tool-cards.png" alt="Tool cards showing successful, failed and read results" width="720" height="1600" loading="lazy"></div>
+        <figcaption><span class="i18n-en">03 · Tool cards</span><span class="i18n-zh">03 · 工具卡</span></figcaption>
+      </figure>
+      <div class="screen-copy">
+        <span class="num">03</span>
+        <h2><span class="i18n-en">Tool output stays inspectable</span><span class="i18n-zh">工具输出仍然可查</span></h2>
+        <p class="i18n-en">Success is green, failure is red, a running call is grey. Long output is clipped and expandable; images and text files expose an explicit open action instead of dumping raw JSON into the conversation.</p>
+        <p class="i18n-zh">成功是绿色、失败是红色、运行中是灰色；长输出默认折叠可展开，图片和文本文件给明确的“查看”入口，而不是把原始 JSON 倒进对话。</p>
+        <ul class="notice-list i18n-en">
+          <li><code>bash</code> keeps <code>exit_code</code> and the error message</li>
+          <li>Image results get a “查看图片” action</li>
+          <li>Text reads get a “查看内容” action</li>
+          <li>The whole card inherits the terminal tool palette</li>
+        </ul>
+        <ul class="notice-list i18n-zh">
+          <li><code>bash</code> 保留 <code>exit_code</code> 与错误信息</li>
+          <li>图片结果有“查看图片”入口</li>
+          <li>文本读取有“查看内容”入口</li>
+          <li>整张卡片沿用终端工具配色</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="screen-block reverse" id="screen-04">
+      <figure class="screen-figure">
+        <div class="frame"><img class="zoomable" src="screenshots/04-tables-mermaid.png" alt="Markdown table and Mermaid flowchart rendered in the app" width="720" height="1600" loading="lazy"></div>
+        <figcaption><span class="i18n-en">04 · Tables and Mermaid</span><span class="i18n-zh">04 · 表格与 Mermaid</span></figcaption>
+      </figure>
+      <div class="screen-copy">
+        <span class="num">04</span>
+        <h2><span class="i18n-en">Tables and diagrams, measured</span><span class="i18n-zh">表格与图，按真实宽度排</span></h2>
+        <p class="i18n-en">CJK column widths are measured from real glyph width, not guessed. Wide tables scroll horizontally; Mermaid renders locally from the packaged runtime, with no CDN request.</p>
+        <p class="i18n-zh">中文列宽按真实字形宽度测量，不靠猜；宽表横向滚动；Mermaid 用本地打包的运行时渲染，不请求 CDN。</p>
+        <ul class="notice-list i18n-en">
+          <li>Square hairline borders, like the terminal</li>
+          <li>Wide tables keep every column readable</li>
+          <li>Vertical diagrams are not clipped</li>
+          <li>Code blocks and rules use the same palette</li>
+        </ul>
+        <ul class="notice-list i18n-zh">
+          <li>与终端一致的方角细线边框</li>
+          <li>宽表保持每列可读，不被挤压</li>
+          <li>竖向长图完整显示，不被截断</li>
+          <li>代码块与分隔线沿用同一套配色</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="screen-block" id="screen-05">
+      <figure class="screen-figure">
+        <div class="frame"><img class="zoomable" src="screenshots/05-context.png" alt="Context usage popover with token and cost breakdown" width="720" height="1600" loading="lazy"></div>
+        <figcaption><span class="i18n-en">05 · Context usage</span><span class="i18n-zh">05 · 上下文用量</span></figcaption>
+      </figure>
+      <div class="screen-copy">
+        <span class="num">05</span>
+        <h2><span class="i18n-en">Know what the turn costs</span><span class="i18n-zh">知道这一轮花了多少</span></h2>
+        <p class="i18n-en">Tap the ring for a breakdown of system prompt, messages and tool output, plus input/output tokens, cache traffic and spend. The ring turns amber at 60% and red at 85%.</p>
+        <p class="i18n-zh">点上下文环可看系统提示、消息与工具输出的占比，以及输入/输出 token、缓存流量和花费；60% 变琥珀、85% 变红。</p>
+        <ul class="notice-list i18n-en">
+          <li>Green under 60%, amber 60–85%, red above 85%</li>
+          <li>Shows model and thinking level</li>
+          <li>Compaction can be triggered early</li>
+          <li>Session info is one tap deeper</li>
+        </ul>
+        <ul class="notice-list i18n-zh">
+          <li>低于 60% 绿色，60–85% 琥珀，高于 85% 红色</li>
+          <li>同时显示模型与思考等级</li>
+          <li>可提前触发上下文压缩</li>
+          <li>再点一次进入会话信息</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="screen-block reverse" id="screen-06">
+      <figure class="screen-figure">
+        <div class="frame"><img class="zoomable" src="screenshots/06-slash-commands.png" alt="Slash command menu above the composer" width="720" height="1600" loading="lazy"></div>
+        <figcaption><span class="i18n-en">06 · Slash commands</span><span class="i18n-zh">06 · 斜杠命令</span></figcaption>
+      </figure>
+      <div class="screen-copy">
+        <span class="num">06</span>
+        <h2><span class="i18n-en">Slash commands without leaving the composer</span><span class="i18n-zh">不离开输入区就能用斜杠命令</span></h2>
+        <p class="i18n-en">Type <code>/</code> or tap the slash button. The menu has two stages: command, then arguments. Full-width <code>／</code> is normalised, and the hint explains what each command changes.</p>
+        <p class="i18n-zh">输入 <code>/</code> 或点斜杠按钮即可。菜单分两段：先选命令，再选参数；全角 <code>／</code> 会自动归一化，提示会说明每条命令改什么。</p>
+        <ul class="notice-list i18n-en">
+          <li><code>/model</code> switches the model for this session</li>
+          <li><code>/mode</code> changes permission mode</li>
+          <li><code>/compact</code> compacts the context</li>
+          <li>Arrow keys and Enter work in the menu</li>
+        </ul>
+        <ul class="notice-list i18n-zh">
+          <li><code>/model</code> 切换当前会话模型</li>
+          <li><code>/mode</code> 切换权限模式</li>
+          <li><code>/compact</code> 压缩上下文</li>
+          <li>菜单里可用方向键与回车</li>
+        </ul>
+        <p class="capture-note i18n-en">The mock bridge advertises three commands; a real pi bridge exposes its full command list.</p>
+        <p class="capture-note i18n-zh">假桥只声明了三条命令；真实 pi 桥会列出完整命令表。</p>
+      </div>
+    </article>
+
+    <article class="screen-block" id="screen-07">
+      <figure class="screen-figure">
+        <div class="frame"><img class="zoomable" src="screenshots/07-machines.png" alt="Machine picker with bridge actions and Termux bootstrap" width="720" height="1600" loading="lazy"></div>
+        <figcaption><span class="i18n-en">07 · Machine picker</span><span class="i18n-zh">07 · 机器选择</span></figcaption>
+      </figure>
+      <div class="screen-copy">
+        <span class="num">07</span>
+        <h2><span class="i18n-en">Switch machines, wake one over SSH</span><span class="i18n-zh">切换机器，SSH 唤醒</span></h2>
+        <p class="i18n-en">Loopback, LAN and Tailscale hosts in one picker. The app merges multiple routes to the same host, remembers the best path, reads SSH config, and can bootstrap a blank Termux from zero.</p>
+        <p class="i18n-zh">本机、局域网与 Tailscale 主机都在一个面板里；同一台机器的多条路径会合并，记住最优路径，读取 SSH 配置，还能从零部署空白 Termux。</p>
+        <ul class="notice-list i18n-en">
+          <li>Bridge URL, token state and reachability</li>
+          <li>Scan loopback and the current subnet</li>
+          <li>Read host SSH config or the bridge host's config</li>
+          <li>Bootstrap a blank Termux and start the bridge</li>
+        </ul>
+        <ul class="notice-list i18n-zh">
+          <li>显示桥地址、token 状态与可达性</li>
+          <li>扫描本机与当前网段</li>
+          <li>读取手机或桥主机的 SSH 配置</li>
+          <li>空白 Termux 一键部署并起桥</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="screen-block reverse" id="screen-08">
+      <figure class="screen-figure">
+        <div class="frame"><img class="zoomable" src="screenshots/08-shell.png" alt="Shell screen with command output and exit code" width="720" height="1600" loading="lazy"></div>
+        <figcaption><span class="i18n-en">08 · Shell</span><span class="i18n-zh">08 · Shell</span></figcaption>
+      </figure>
+      <div class="screen-copy">
+        <span class="num">08</span>
+        <h2><span class="i18n-en">Run a command on the connected host</span><span class="i18n-zh">在已连接主机上执行命令</span></h2>
+        <p class="i18n-en">The Shell tab posts to <code>/v1/bash</code> and streams output over SSE. Commands can be marked out of context, so a quick diagnostic does not spend tokens.</p>
+        <p class="i18n-zh">Shell 页调用 <code>/v1/bash</code>，输出通过 SSE 流回；命令可以标记为不进上下文，快速排查不烧 token。</p>
+        <ul class="notice-list i18n-en">
+          <li>Header shows the host behind the bridge</li>
+          <li>Exit code is visible after each run</li>
+          <li>Recent commands stay as chips</li>
+          <li>“不进上下文” keeps diagnostics out of the prompt</li>
+        </ul>
+        <ul class="notice-list i18n-zh">
+          <li>标题显示桥所在主机</li>
+          <li>每次执行后显示退出码</li>
+          <li>最近命令保留为快捷 chip</li>
+          <li>“不进上下文”避免诊断命令占用提示词</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="screen-block" id="screen-09">
+      <figure class="screen-figure">
+        <div class="frame"><img class="zoomable" src="screenshots/09-sessions-light.png" alt="Session list in the light theme" width="720" height="1600" loading="lazy"></div>
+        <figcaption><span class="i18n-en">09 · Light theme</span><span class="i18n-zh">09 · 浅色主题</span></figcaption>
+      </figure>
+      <div class="screen-copy">
+        <span class="num">09</span>
+        <h2><span class="i18n-en">Light, dark, or follow system</span><span class="i18n-zh">浅色、深色或跟随系统</span></h2>
+        <p class="i18n-en">Material You dynamic colour on Android 12+, baseline palette below. Text size is a global multiplier layered on the system font scale; the terminal palette keeps its contrast in both themes.</p>
+        <p class="i18n-zh">Android 12+ 使用 Material You 动态取色，低版本回落到基线配色；字号是叠加在系统缩放之上的全局倍率，终端配色在明暗两套主题里都保持对比度。</p>
+        <ul class="notice-list i18n-en">
+          <li>System, light or dark, persisted per device</li>
+          <li>Status bar icons follow the app theme</li>
+          <li>Global and chat-only text scaling</li>
+          <li>Amber, purple and green keep their meaning</li>
+        </ul>
+        <ul class="notice-list i18n-zh">
+          <li>跟随系统、浅色或深色，按设备持久化</li>
+          <li>状态栏图标跟随 app 主题</li>
+          <li>全局字号与对话字号两级倍率</li>
+          <li>琥珀、紫、绿的语义保持不变</li>
+        </ul>
+      </div>
+    </article>
+
+    <aside class="capture-note">
+      <p class="i18n-en"><strong>How these were captured.</strong> 720×1600 AVD <code>pipocket-qa</code> + <code>tools/mock-bridge.mjs</code>. The mock answered health, sessions, transcript, shell and context calls; no real pi process, model or personal data was involved. All names, paths and sessions are synthetic. IPs shown are local only: <code>10.0.2.2</code> (emulator host alias) and <code>127.0.0.1</code> (loopback); no real address appears.</p>
+      <p class="i18n-zh"><strong>这些图怎么拍的。</strong>720×1600 的 AVD <code>pipocket-qa</code> + <code>tools/mock-bridge.mjs</code>。假桥应答 health、sessions、转录、Shell 与上下文请求；没有真实 pi 进程、模型或个人信息参与。所有名称、路径与会话均为合成；出现的 IP 仅为本地地址：<code>10.0.2.2</code>（模拟器宿主机别名）与 <code>127.0.0.1</code>（回环）；没有真实地址。</p>
+    </aside>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div>
+      <span class="i18n-en">Pocket Pi is an independent client for <a href="https://pi.dev" rel="noopener">pi</a>. Built for a phone that happens to be a workstation.</span>
+      <span class="i18n-zh">Pocket Pi 是 <a href="https://pi.dev" rel="noopener">pi</a> 的独立客户端，为“恰好也是工作站的手机”而做。</span>
+    </div>
+    <div class="footer-links">
+      <a href="index.html"><span class="i18n-en">Home</span><span class="i18n-zh">首页</span></a>
+      <a href="https://github.com/OhiyoX/pi-pocket" rel="noopener">GitHub</a>
+      <a href="https://github.com/OhiyoX/pi-pocket/blob/main/SECURITY.md" rel="noopener"><span class="i18n-en">Security</span><span class="i18n-zh">安全</span></a>
+      <a href="https://github.com/OhiyoX/pi-pocket/blob/main/LICENSE" rel="noopener">MIT</a>
+    </div>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="Image preview">
+  <button class="icon-button lightbox-close" id="lightboxClose" type="button" aria-label="Close image">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+  <img id="lightboxImage" alt="">
+</div>
+
+<script src="assets/landing.js"></script>
+</body>
+</html>

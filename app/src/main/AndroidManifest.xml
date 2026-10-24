@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- 会话结束/停止时发通知（Android 13+ 需要运行时授权） -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- 局域网自动探测用 ConnectivityManager 读当前网段（缺它会抛 SecurityException） -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- 让 app 能请 Termux 帮忙把本机桥拉起来（Termux 侧还需 allow-external-apps=true） -->
+    <uses-permission android:name="com.termux.permission.RUN_COMMAND" />
+    <!-- 后台提醒：用前台服务守住 SSE（远端机器的“等确认/跑完”通知靠它送到） -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+
+    <application
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.PiPocket">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|keyboardHidden|uiMode">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- 桥在每轮结束时发本地广播；app 按前后台决定弹不弹系统通知 -->
+        <receiver
+            android:name=".NotifyReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="id.harness.pipocket.NOTIFY" />
+            </intent-filter>
+        </receiver>
+
+        <!-- 后台提醒：持一条低优先级带驻通知，守住到桥的 SSE（否则后台 socket 会被系统收掉） -->
+        <service
+            android:name=".LinkService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+    </application>
+</manifest>

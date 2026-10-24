@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  app 连的是自己/局域网上自建的 pi 桥（明文 HTTP + bearer token）。域名是动态的（loopback / LAN IP / tailnet IP），
+  无法按域名列白名单，所以这里放开明文；安全边界是桥那一侧的 token（非 loopback 绑定必须设 token，否则桥拒绝启动）。
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

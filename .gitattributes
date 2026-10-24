@@ -1,0 +1,7 @@
+# 脚本要在 Termux/Linux 上跑，统一 LF；只有 Windows 批处理用 CRLF。
+* text=auto eol=lf
+*.sh text eol=lf
+gradlew text eol=lf
+*.bat text eol=crlf
+*.jar binary
+*.png binary

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 启动图标底色：M3 baseline primary（自适应图标背景必须是纯色/可平铺 drawable） -->
+    <color name="ic_launcher_background">#6750A4</color>
+</resources>

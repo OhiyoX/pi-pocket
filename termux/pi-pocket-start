@@ -1,0 +1,256 @@
+#!/data/data/com.termux/files/usr/bin/sh
+# pi-pocket 桥的启动器：给 app 的 `com.termux.RUN_COMMAND` 用，也给手工/SSH 拉起用。
+# 它做四件事：占 wake lock → 加载并持久化 token/bind → 必要时按精确 PID 重启旧桥 → exec 桥本体；
+# 日志落在 ~/.pi/agent/pi-pocket-start.log。远端机器用 `sh pi-pocket-start` 调（shebang 是 Termux 路径）。
+set -u
+
+# RUN_COMMAND may omit Termux's exec compatibility preload. It must be present
+# before exec(node), not added inside Node: pi uses #!/usr/bin/env node.
+TERMUX_EXEC_LIB="${PREFIX:-/data/data/com.termux/files/usr}/lib/libtermux-exec.so"
+if [ -f "$TERMUX_EXEC_LIB" ]; then
+  case ":${LD_PRELOAD:-}:" in
+    *":$TERMUX_EXEC_LIB:"*) ;;
+    *) export LD_PRELOAD="$TERMUX_EXEC_LIB${LD_PRELOAD:+:$LD_PRELOAD}" ;;
+  esac
+fi
+
+LOG="$HOME/.pi/agent/pi-pocket-start.log"
+mkdir -p "$(dirname "$LOG")"
+exec >>"$LOG" 2>&1
+echo "== $(date -u +%FT%TZ) pi-pocket-start =="
+echo "PATH=$PATH"
+
+if command -v termux-wake-lock >/dev/null 2>&1; then
+  termux-wake-lock && echo "wake-lock ok" || echo "wake-lock failed (继续)"
+fi
+
+# ── token / bind（用户口径：本机桥也不能免 token）──────────────────────────────
+# app 拉起时会用 PI_POCKET_TOKEN=<32hex> 传进来；第一次收到就写进 env 文件（600），
+# 之后手工启动也复用同一个 token，不会出现"app 有 token、桥没有"的不一致。
+# PI_POCKET_HOST 同口径：传入就持久化，未传入则用 env 文件里的值；都没有=回环。
+# 远端机器要显式 PI_POCKET_HOST=0.0.0.0（桥源码强制：非 loopback 必须带 token）。
+ENV_FILE="$HOME/.pi/agent/pi-pocket.env"
+mkdir -p "$(dirname "$ENV_FILE")"
+PASSED_TOKEN="${PI_POCKET_TOKEN:-}"
+PASSED_HOST="${PI_POCKET_HOST:-}"
+if [ -f "$ENV_FILE" ]; then
+  # shellcheck disable=SC1090
+  . "$ENV_FILE"
+  echo "env 取自 $ENV_FILE"
+fi
+[ -n "$PASSED_TOKEN" ] && PI_POCKET_TOKEN="$PASSED_TOKEN"
+[ -n "$PASSED_HOST" ] && PI_POCKET_HOST="$PASSED_HOST"
+HOST="${PI_POCKET_HOST:-127.0.0.1}"
+PORT="${PI_POCKET_PORT:-8789}"
+
+# 值会写进 env 文件并被 source：不允许空白/引号/替换符（app 生成的 token 是 32 hex）
+case "${PI_POCKET_TOKEN:-}" in
+  *[!A-Za-z0-9._~+/=-]*) echo "错误：token 只允许 A-Z a-z 0-9 . _ ~ + / = -，当前含其它字符"; exit 2 ;;
+esac
+case "$HOST" in
+  *[!A-Za-z0-9.:-]*) echo "错误：PI_POCKET_HOST 只允许字母/数字/./:/-"; exit 2 ;;
+esac
+case "$HOST" in
+  127.0.0.1|localhost) ;;
+  *) [ -n "${PI_POCKET_TOKEN:-}" ] || { echo "错误：非 loopback 绑定必须设置 PI_POCKET_TOKEN（桥会拒绝启动）"; exit 2; } ;;
+esac
+
+# ── bind 预检：在写 env / 停健康桥之前，先确认这个地址真能绑 ────────────────
+# 词法合法但不可绑的地址（如 PI_POCKET_HOST=10.9.9.9 这种笔误）会让新桥 EADDRNOTAVAIL。
+# 若先写 env 再停桥，结果就是「健康桥被停 + env 永久带坏」，只能手工救（独立审查 CASE G）。
+# EADDRINUSE 视为 OK：端口被现有桥（或测试假桥）占着是正常场景。
+check_bindable() {
+  command -v node >/dev/null 2>&1 || { echo "skip no-node"; return 0; }
+  PI_POCKET_CHECK_HOST="$HOST" PI_POCKET_CHECK_PORT="$PORT" node -e '
+    const net = require("node:net");
+    const server = net.createServer();
+    server.once("error", error => {
+      if (error.code === "EADDRINUSE") { process.stdout.write("ok eaddrinuse"); return; }
+      process.stdout.write("fail " + (error.code || error.message));
+    });
+    server.listen(Number(process.env.PI_POCKET_CHECK_PORT), process.env.PI_POCKET_CHECK_HOST, () => {
+      server.close(() => process.stdout.write("ok"));
+    });
+  ' 2>/dev/null
+}
+BIND_CHECK="$(check_bindable)"
+case "$BIND_CHECK" in
+  ok*) echo "bind 预检通过（$HOST:$PORT ${BIND_CHECK#ok}）" ;;
+  fail*)
+    echo "错误：无法绑定 $HOST:$PORT（${BIND_CHECK#fail }）。未写 env、未动现有桥。"
+    exit 2
+    ;;
+  *) echo "警告：bind 预检无结论（${BIND_CHECK:-空}），继续" ;;
+esac
+
+if [ -n "$PASSED_TOKEN" ] || [ -n "$PASSED_HOST" ]; then
+  TMP_ENV="$ENV_FILE.tmp.$$"
+  { [ -f "$ENV_FILE" ] && grep -v -e '^PI_POCKET_TOKEN=' -e '^PI_POCKET_HOST=' "$ENV_FILE" || true; } > "$TMP_ENV"
+  [ -n "${PI_POCKET_TOKEN:-}" ] && printf 'PI_POCKET_TOKEN=%s\n' "$PI_POCKET_TOKEN" >> "$TMP_ENV"
+  [ -n "${PI_POCKET_HOST:-}" ] && printf 'PI_POCKET_HOST=%s\n' "$PI_POCKET_HOST" >> "$TMP_ENV"
+  chmod 600 "$TMP_ENV" 2>/dev/null || true
+  # 留一份上一版：新配置即使预检通过，运行期仍可能出问题（端口被占、桥起不来）
+  if [ -f "$ENV_FILE" ]; then
+    cp "$ENV_FILE" "$ENV_FILE.prev" 2>/dev/null && chmod 600 "$ENV_FILE.prev" 2>/dev/null && echo "旧 env 备份到 $ENV_FILE.prev"
+  fi
+  mv "$TMP_ENV" "$ENV_FILE"
+  echo "env 已写入 $ENV_FILE（bind=$HOST）"
+elif [ ! -f "$ENV_FILE" ]; then
+  echo "警告：没有 token（app 会在下次拉起时补上；手工启动请 export PI_POCKET_TOKEN=…）"
+fi
+export PI_POCKET_TOKEN
+export PI_POCKET_HOST="$HOST"
+
+# ── 浏览器垫片（BROWSER shim）──────────────────────────────
+# web-search 的 workflow=summary-review 语义是「打开 curator 页面」；桥是 --mode rpc 无 TTY，
+# pi 会退化成调系统浏览器（termux-open-url）⇒ app 里突然弹出浏览器。
+# 这里：优先命中本目录的 termux-open-url（软链到垫片）+ BROWSER 指向垫片 ⇒ 只记 URL、不开浏览器。
+# 真实 URL 落在 ~/.pi/agent/pocket-browser.log，供桥 /v1/curator/last 与 app 内嵌 WebView 使用。
+POCKET_SHIM_DIR="$HOME/.pi/agent/bin"
+mkdir -p "$POCKET_SHIM_DIR"
+SHIM="$POCKET_SHIM_DIR/pocket-browser-shim"
+# 仓根：代码根约定下是 <代码根>/pi-pocket/repo（phone = ~/projects/pi-pocket/repo）；老主机（host-a）是 ~/projects/pi-pocket。
+POCKET_REPO=""
+for d in "${PI_POCKET_WORK:-}" "$HOME/projects/pi-pocket/repo" "$HOME/workspace/pi-pocket"; do
+  if [ -n "$d" ] && [ -f "$d/termux/pocket-browser-shim.sh" ]; then POCKET_REPO="$d"; break; fi
+done
+if [ -n "$POCKET_REPO" ]; then
+  cp "$POCKET_REPO/termux/pocket-browser-shim.sh" "$SHIM"
+elif [ -f "${PREFIX:-}/bin/pocket-browser-shim" ]; then
+  cp "${PREFIX:-}/bin/pocket-browser-shim" "$SHIM"
+fi
+if [ -f "$SHIM" ]; then
+  chmod 755 "$SHIM"
+  # pi 的 openBrowser() 在 Linux/Termux 上硬编码 spawn `xdg-open`（不读 $BROWSER），
+  # 所以三个名字都要垫：PATH 靠前后同名命令先命中垫片。
+  for n in xdg-open termux-open-url termux-open; do ln -sf "$SHIM" "$POCKET_SHIM_DIR/$n"; done
+  export BROWSER="$SHIM"
+  export PATH="$POCKET_SHIM_DIR:$PATH"
+  echo "browser shim: BROWSER=$BROWSER (xdg-open/termux-open-url/termux-open 已垫)"
+else
+  echo "browser shim: 未找到垫片，跳过（web-search curator 仍会弹浏览器）"
+fi
+
+: "${PI_POCKET_CWD:=$HOME/workspace}"
+export PI_POCKET_CWD
+
+# ── MCP 凭据：pi 的 mcp.json 用 ${OBSIDIAN_MCP_API_KEY} / ${HEALTH_MCP_TOKEN} 占位，
+#    没有这些变量 → 两个 MCP 都 401 → 会话里一个 MCP 工具都注册不上。所以启动前加载凭据文件。
+SECRETS_FILE="$HOME/.pi/agent/obsidian-mcp.env"
+if [ -f "$SECRETS_FILE" ]; then
+  # shellcheck disable=SC1090
+  . "$SECRETS_FILE"
+  export OBSIDIAN_MCP_URL OBSIDIAN_MCP_API_KEY HEALTH_MCP_TOKEN
+  echo "MCP 凭据已加载（$SECRETS_FILE）"
+else
+  echo "警告：缺少 $SECRETS_FILE，MCP 工具不会注册"
+fi
+
+# ── 已经在跑的桥：bind/auth 不匹配才重启；FORCE=1 无条件重启（安装/更新用）────────
+# 用 node 探（桥本身就是 node 跑的），一次拿回 pid/bind/auth；停进程只认核实过的 PID。
+WANT_BIND="${HOST}:${PORT}"
+WANT_AUTH=0
+[ -n "${PI_POCKET_TOKEN:-}" ] && WANT_AUTH=1
+
+read_status() {
+  PI_POCKET_PROBE_TOKEN="${PI_POCKET_TOKEN:-}" PI_POCKET_PROBE_PORT="$PORT" node -e '
+    const t = process.env.PI_POCKET_PROBE_TOKEN || "";
+    const port = process.env.PI_POCKET_PROBE_PORT || "8789";
+    fetch("http://127.0.0.1:" + port + "/v1/health", {
+      headers: t ? { authorization: "Bearer " + t } : {},
+      signal: AbortSignal.timeout(2000),
+    }).then(async r => {
+      if (!r.ok) return process.stdout.write(String(r.status) + " - - -");
+      const d = (await r.json()).data || {};
+      process.stdout.write("200 " + (d.pid || "-") + " " + (d.bind || "-") + " " + (d.auth ? "1" : "0"));
+    }).catch(() => process.stdout.write("000 - - -"));
+  ' 2>/dev/null
+}
+
+# 只在「本端口域」找桥：桥的 PI_POCKET_PORT（未设=默认 8789）必须等于我们的 PORT。
+# 只按 cmdline 名字匹配会把别的端口上的桥当目标（2026-10-23 host-a 实例：测试用 18999，
+# 却把 8789 上的正式桥停了）——名字/命令行子串不算身份。
+bridge_port() {
+  p="$(tr '\0' '\n' < "/proc/$1/environ" 2>/dev/null | sed -n 's/^PI_POCKET_PORT=//p' | head -1)"
+  echo "${p:-8789}"
+}
+
+find_bridge_pid() {
+  for d in /proc/[0-9]*; do
+    [ -r "$d/cmdline" ] || continue
+    cmd="$(tr '\0' ' ' < "$d/cmdline" 2>/dev/null || true)"
+    case "$cmd" in *node*pi-pocket-bridge*) ;; *) continue ;; esac
+    pid="${d#/proc/}"
+    [ "$(bridge_port "$pid")" = "$PORT" ] || continue
+    echo "$pid"; return 0
+  done
+  return 1
+}
+
+stop_bridge() {
+  pid="$1"
+  case "$pid" in ''|'-'|*[!0-9]*) pid="$(find_bridge_pid || true)" ;; esac
+  if [ -z "$pid" ]; then echo "警告：没找到运行中的桥进程（可能已退出）"; return 0; fi
+  cmd="$(tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null || true)"
+  case "$cmd" in
+    *node*pi-pocket-bridge*) ;;
+    *) echo "错误：PID $pid 不是 pi-pocket 桥，拒绝停止"; return 1 ;;
+  esac
+  # health 里的 PID 也可能被回收：再核一次它确实服务本端口（不是另一张桥）
+  owner_port="$(bridge_port "$pid")"
+  [ "$owner_port" = "$PORT" ] || { echo "错误：PID $pid 服务的是端口 $owner_port，不是本桥的 $PORT，拒绝停止"; return 1; }
+  echo "停止旧桥 pid=$pid"
+  kill "$pid" 2>/dev/null || true
+  i=0
+  while [ -d "/proc/$pid" ] && [ "$i" -lt 50 ]; do i=$((i+1)); sleep 0.1; done
+  if [ -d "/proc/$pid" ]; then
+    echo "警告：旧桥 pid=$pid 5 秒内未退出，强制停止"
+    kill -9 "$pid" 2>/dev/null || true
+    i=0
+    while [ -d "/proc/$pid" ] && [ "$i" -lt 20 ]; do i=$((i+1)); sleep 0.1; done
+  fi
+  [ -d "/proc/$pid" ] && { echo "错误：旧桥 pid=$pid 仍在运行，未启动新桥"; return 1; }
+  return 0
+}
+
+STATUS="$(read_status)"
+set -- $STATUS
+CODE="${1:-000}"; PID="${2:--}"; BIND="${3:--}"; AUTH="${4:--}"
+RESTART=0
+if [ "${FORCE:-0}" = "1" ]; then
+  # 无条件：probe=000（桥卡死/事件循环阻塞/超时）也必须换掉旧进程——
+  # 那正是「装/更新新桥代码」最需要重启的场景，不能因为探不到就再起一个撞 EADDRINUSE。
+  # stop_bridge "-" 会按 /proc 核实 PID，找不到进程就是 no-op。
+  echo "FORCE=1 → 无条件重启（probe=$CODE）"
+  RESTART=1
+else
+  case "$CODE" in
+    200)
+      if [ "$BIND" = "$WANT_BIND" ] && [ "$AUTH" = "$WANT_AUTH" ]; then
+        echo "已有桥在跑且 bind/auth 匹配（$BIND auth=$AUTH），不重启"
+        exit 0
+      fi
+      echo "已有桥在跑但配置不匹配（$BIND auth=$AUTH → 期望 $WANT_BIND auth=$WANT_AUTH）→ 重启"
+      RESTART=1
+      ;;
+    401|403)
+      echo "已有桥 token 不匹配（HTTP $CODE）→ 重启"
+      RESTART=1
+      ;;
+    000) echo "本机还没有桥在跑（probe=$CODE）→ 启动" ;;
+    *) echo "桥状态异常（probe=$CODE）→ 重启"; RESTART=1 ;;
+  esac
+fi
+if [ "$RESTART" = "1" ]; then
+  stop_bridge "$PID" || exit 1
+  sleep 0.5
+fi
+
+BIN="${PI_POCKET_BIN:-pi-pocket-bridge}"
+if ! command -v "$BIN" >/dev/null 2>&1; then
+  echo "找不到 $BIN（先跑 ./termux/install.sh）"
+  exit 127
+fi
+
+echo "starting: $BIN (cwd=$PI_POCKET_CWD, bind=${PI_POCKET_HOST:-127.0.0.1})"
+exec "$BIN"
