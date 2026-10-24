@@ -13,7 +13,7 @@
 #   4. 全部输出到 stdout（app 侧的 RUN_COMMAND 会把日志显示出来）。
 set -u
 
-REPO="${PI_POCKET_REPO:-https://github.com/OhiyoX/pi-pocket.git}"
+REPO="${PI_POCKET_REPO:-ssh://https://github.com/OhiyoX/pi-pocket.git}"
 REPO_HTTPS="${PI_POCKET_REPO_HTTPS:-https://github.com/OhiyoX/pi-pocket.git}"
 # 代码根约定（vault `60-Skills/vault-workspace-maintenance/references/placement.md`）：
 # 新主机是 <代码根>/<项目>/repo（四区）；phone = ~/projects/pi-pocket/repo。老主机（host-a）是 ~/projects/pi-pocket。
@@ -117,6 +117,16 @@ else
   say "沿用已有 token"
 fi
 if [ -x "$HOME/.pi/agent/start-bridge.sh" ]; then
+  # 服务化：runsvdir 在的时候桥由 runsv 监督（秒级自愈）。bootstrap 常从 app 的 RUN_COMMAND 跑，
+  # 那里没有登录 shell 的 .zprofile，所以这里自己确保 runsvdir 在
+  # （service-daemon 不幂等，只在完全没有 runsvdir 时调，与 sshd 那套一致）。
+  SVDIR="${SVDIR:-$PREFIX/var/service}"
+  export SVDIR
+  if [ -f "$PREFIX/etc/profile.d/start-services.sh" ] && [ -x "$SVDIR/pi-pocket/run" ] && \
+     [ "$(ps -eo args 2>/dev/null | grep -c '[r]unsvdir /')" -eq 0 ]; then
+    . "$PREFIX/etc/profile.d/start-services.sh"
+    say "已启动 runsvdir（服务 $SVDIR/pi-pocket 接管桥）"
+  fi
   FORCE=1 bash "$HOME/.pi/agent/start-bridge.sh" || say "（start-bridge.sh 返回非 0，继续体检）"
 else
   die "缺 ~/.pi/agent/start-bridge.sh（install.sh 应该会装它）"

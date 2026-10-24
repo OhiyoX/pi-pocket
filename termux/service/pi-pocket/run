@@ -1,0 +1,58 @@
+#!/data/data/com.termux/files/usr/bin/sh
+# termux-services（runsv）服务脚本：pi-pocket 桥的唯一所有者。
+#
+# 为什么归 runsv 管：
+#   * 以前靠 termux-job-scheduler 每 15 分钟跑一次 watchdog 拉桥（最小周期受 Android 限制），
+#     桥崩了最多 15 分钟才回来；runsv 是秒级重启。
+#   * 桥必须由启动器 pi-pocket-start 起（token/bind 持久化、bind 预检、wake-lock、
+#     browser shim、MCP 凭据全在它里面），所以这里 exec 的是启动器，不是桥本体。
+#
+# FORCE=1 的作用：
+#   app 的 RUN_COMMAND 可能在 runsvdir 起来之前已经起过一份**不受监督**的桥。
+#   runsv 每次起本脚本都要求"这一个实例"占住端口 8789；FORCE=1 下 pi-pocket-start
+#   用 /proc 核实后的精确 PID 停掉旧桥再 exec 桥本体 ⇒ 不会两份桥抢端口，
+#   也不会出现"启动器探测到健康就 exit 0 → runsv 1 秒一轮空转重启"。
+#   顺带好处：`sv restart pi-pocket`（安装/更新后）总能真正换掉进程。
+#
+# 注意：升级 termux-services / 桥包可能重置 $PREFIX/var/service 下的 run 脚本
+# （2026-10-18 sshd 实测过），所以本文件在仓里（termux/service/pi-pocket/run），
+# 由 termux/install.sh 重装；home 侧 start-bridge.sh 与 boot 脚本是兜底入口。
+set -u
+
+PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
+export PREFIX
+export HOME="${HOME:-/data/data/com.termux/files/home}"
+export SVDIR="${SVDIR:-$PREFIX/var/service}"
+export LOGDIR="${LOGDIR:-$PREFIX/var/log}"
+case ":$PATH:" in
+  *":$PREFIX/bin:"*) ;;
+  *) export PATH="$PREFIX/bin:$HOME/bin:$PATH" ;;
+esac
+# Termux:Boot / RUN_COMMAND 环境不注入 termux-exec；桥的 shebang 是 $PREFIX/bin/env node，
+# 缺预载时 npm 全局 bin 一类脚本会 bad interpreter（2026-10-18 踩过）。
+if [ -f "$PREFIX/lib/libtermux-exec.so" ]; then
+  case ":${LD_PRELOAD:-}:" in
+    *":$PREFIX/lib/libtermux-exec.so:"*) ;;
+    *) export LD_PRELOAD="$PREFIX/lib/libtermux-exec.so${LD_PRELOAD:+:$LD_PRELOAD}" ;;
+  esac
+fi
+
+if ! command -v pi-pocket-start >/dev/null 2>&1; then
+  echo "pi-pocket-start 未安装（先跑 termux/install.sh）；runsv 每 5s 重试" >&2
+  sleep 5
+  exit 1
+fi
+
+# 报告源码版本：$PREFIX/bin/pi-pocket-bridge 指向 pi-pocket-runtime/<完整SHA>/ 时，
+# 把 <SHA> 交给桥的 /v1/health.sourceSha（部署脚本也会注入同名变量，
+# 但 runsv 的环境来自 runsvdir，没这份值——服务起来的桥不该丢版本标记）。
+if [ -z "${PI_POCKET_SOURCE_SHA:-}" ] && [ -L "$PREFIX/bin/pi-pocket-bridge" ]; then
+  target=$(readlink -f "$PREFIX/bin/pi-pocket-bridge" 2>/dev/null || true)
+  case "$target" in
+    */pi-pocket-runtime/*/pi-pocket-bridge.mjs)
+      PI_POCKET_SOURCE_SHA=$(basename "$(dirname "$target")")
+      export PI_POCKET_SOURCE_SHA ;;
+  esac
+fi
+
+FORCE=1 exec pi-pocket-start

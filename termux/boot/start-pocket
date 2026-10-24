@@ -1,0 +1,48 @@
+#!/data/data/com.termux/files/usr/bin/sh
+# Termux:Boot 开机拉起 pi-pocket 桥（幂等）。
+# 顺序：先确保 termux-services 的 runsvdir 在（service-daemon 不幂等，只在完全没有时才起），
+#      再 sv up pi-pocket —— 桥由 runsv 监督，崩了秒级自愈；
+#      runsv/sv 不可用（termux-services 没装）时退回 start-bridge.sh 直起。
+# 日志：~/.termux/boot/start-pocket.log
+PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
+export PREFIX
+export HOME="${HOME:-/data/data/com.termux/files/home}"
+export SVDIR="$PREFIX/var/service"
+export LOGDIR="$PREFIX/var/log"
+export PATH="$PREFIX/bin:$HOME/bin:$PATH"
+
+# termux-exec 预载（Termux:Boot 环境不注入；桥的 shebang 是 $PREFIX/bin/env node）
+if [ -f "$PREFIX/lib/libtermux-exec.so" ] && [ -z "${LD_PRELOAD:-}" ]; then
+  LD_PRELOAD="$PREFIX/lib/libtermux-exec.so"
+  export LD_PRELOAD
+fi
+
+LOG="$HOME/.termux/boot/start-pocket.log"
+mkdir -p "$(dirname "$LOG")"
+termux-wake-lock >/dev/null 2>&1
+
+# 设备刚起：等 Termux 环境（node、$PREFIX/bin 就绪）
+sleep 10
+
+if [ -f "$PREFIX/etc/profile.d/start-services.sh" ] && \
+   [ "$(ps -eo args 2>/dev/null | grep -c '[r]unsvdir /')" -eq 0 ]; then
+  . "$PREFIX/etc/profile.d/start-services.sh"
+fi
+
+# 有 down 标记时 runsv 永不自动拉起（与 sshd 同一坑）
+[ -x "$SVDIR/pi-pocket/run" ] && [ -e "$SVDIR/pi-pocket/down" ] && sv-enable pi-pocket >/dev/null 2>&1
+
+i=0
+while [ "$i" -lt 20 ]; do
+  case "$(sv status pi-pocket 2>/dev/null)" in
+    run:*) echo "$(date '+%F %T') pi-pocket service up (attempt $i)" >>"$LOG"; exit 0 ;;
+  esac
+  sv up pi-pocket >/dev/null 2>&1
+  i=$((i + 1))
+  sleep 1
+done
+
+{
+  echo "$(date '+%F %T') 服务没起来（runsv 不在 / 未装 termux-services）→ 退回 start-bridge.sh"
+} >>"$LOG"
+bash "$HOME/.pi/agent/start-bridge.sh" >>"$LOG" 2>&1

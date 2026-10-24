@@ -8,6 +8,8 @@
 ./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug --console=plain
 node --check termux/pi-pocket-bridge.mjs
 node --test script/bridge-runtime.test.mjs
+node --test script/pi-pocket-start.test.mjs      # 启动器（Termux 上 14 项，Windows 上 7 项因 /proc 跳过）
+node --test script/pi-pocket-service.test.mjs    # 服务化：run 脚本 + start-bridge 分流（sv / 直起）
 node script/check-htmlvisual-js.mjs
 ```
 

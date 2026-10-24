@@ -2,7 +2,7 @@
 // 每个用例用独立 HOME；桥本体用假脚本代替，不会启动真桥。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { chmodSync, copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
@@ -337,13 +337,16 @@ test('已有桥 bind/auth 匹配：不重启', { skip: process.platform === 'win
   }
 });
 
-// A harmless empty preload is rejected by the Linux loader but still lets the
-// fake bridge execute; this checks the launch environment without Termux/phone.
+// Android 的 linker 比 glibc 严：0 字节的 preload 会让**所有**子进程 CANNOT LINK
+// （2026-10-24 在 phone 实测），所以在 Termux 上用真的 libtermux-exec.so 复制一份；
+// PC / CI 没有这个库，继续用空文件。
 test('Termux compatibility preload is restored and not duplicated', {skip:process.platform==='win32'}, async () => {
   const box=sandbox();
   try {
     const lib=path.join(box.home,'lib','libtermux-exec.so');
-    mkdirSync(path.dirname(lib)); writeFileSync(lib,'');
+    mkdirSync(path.dirname(lib));
+    const real=path.join(process.env.PREFIX||'/data/data/com.termux/files/usr','lib','libtermux-exec.so');
+    if(existsSync(real)) copyFileSync(real,lib); else writeFileSync(lib,'');
     const fake=path.join(box.home,'preload-bridge');
     writeFileSync(fake,'#!/bin/sh\nprintf "%s" "$LD_PRELOAD" > "$PI_POCKET_DUMP"\n'); chmodSync(fake,0o755);
     for(const inherited of ['',lib]) {

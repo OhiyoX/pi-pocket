@@ -11,11 +11,59 @@ loopback，所以「Termux 里跑本桥 + app 连 `127.0.0.1:8789`」是**手机
 ## 装与跑
 
 ```sh
-./termux/install.sh                     # → $PREFIX/bin/pi-pocket-bridge + pi-pocket-start
-termux-wake-lock
-nohup pi-pocket-bridge >> ~/.pi/agent/pi-pocket-bridge.log 2>&1 &
+./termux/install.sh                     # → $PREFIX/bin/{pi-pocket-bridge,pi-pocket-start} + 服务目录 + home 兜底脚本
+sv up pi-pocket                         # Termux 上：交给 runsv 监督（推荐）
 curl -s localhost:8789/v1/health
 ```
+
+没有 termux-services 的 POSIX 主机（如 host-a）直接跑：
+
+```sh
+termux-wake-lock 2>/dev/null; nohup pi-pocket-start >> ~/.pi/agent/pi-pocket-start.log 2>&1 &
+```
+
+### 作为服务运行（termux-services / runsv，2026-10-24 起）
+
+Termux 上桥**由 runsv 监督**，不再是「job-scheduler 每 15 分钟跑一次 watchdog」：桥崩了秒级重启，
+`sv` 一套命令管生命周期，日志仍在 `~/.pi/agent/pi-pocket-start.log`。
+
+| 对象 | 路径 | 谁维护 |
+| --- | --- | --- |
+| 服务 | `$PREFIX/var/service/pi-pocket/run` | 仓 `termux/service/pi-pocket/run`，由 `termux/install.sh` 落盘 |
+| 启动器 | `$PREFIX/bin/pi-pocket-start` | 仓 `termux/pi-pocket-start` |
+| 幂等入口 | `~/.pi/agent/start-bridge.sh` | 仓 `termux/start-bridge.sh`（有服务就只发 `sv`，没服务才直起） |
+| 外层兜底 | `~/.pi/agent/bin/pi-pocket-watchdog.sh` | 仓 `termux/pi-pocket-watchdog.sh`，job-scheduler job **8899**（15 分钟，persisted） |
+| 开机 | `~/.termux/boot/start-pocket` | 仓 `termux/boot/start-pocket`（先起 runsvdir，再 `sv up pi-pocket`） |
+
+```sh
+sv status pi-pocket        # run: pi-pocket: (pid …) …s
+sv restart pi-pocket       # 换进程（安装/更新后必须用这个，等价 FORCE=1 start-bridge.sh）
+sv down pi-pocket          # 临时停（runsv 不再自拉，但 watchdog 仍会在 ≤ 15 min 内按保活把它拉回）
+sv-disable pi-pocket       # 长期停用（写 down 标记：runsv / watchdog / start-bridge 都不会自拉）
+sv-enable pi-pocket        # 清 down 标记 + 交回 runsv 自动拉起
+```
+
+两个“停”不一样，实测区别（2026-10-24 phone）：
+
+| 命令 | 立即停 | 写 `down` 标记 | 之后谁会拉起它 |
+| --- | --- | --- | --- |
+| `sv down` | ✔ | ✘ | watchdog（≤ 15 min）或下一次 `start-bridge.sh`（保活职责） |
+| `sv-disable` | ✔ | ✔ | 只有 `sv-enable` 或 `FORCE=1 start-bridge.sh`（安装/更新/显式重启，会先清标记再拉） |
+
+`FORCE=1 start-bridge.sh` 会先 `sv-enable` 再 `sv restart`——否则进程被拉起、runsv 还处于“want down”，
+下一次崩就不再自愈，且 `sv status` 会写 `normally down`。
+
+为什么 `run` 里是 `FORCE=1 exec pi-pocket-start` 而不是 `exec pi-pocket-bridge`：
+
+- token/bind 持久化、bind 预检、wake-lock、browser shim、MCP 凭据全在启动器里；
+- `FORCE=1` 让 runsv 每次起服务都**独占**端口 8789：app 的 `RUN_COMMAND` 可能在 runsvdir 之前
+  已起过一份不受监督的桥，启动器会按健康响应里的精确 PID 收归它再 exec，
+  不会出现两份桥抢端口，也不会出现「探测到健康就 exit 0 → runsv 每秒空转重启」。
+- 代价：runsvdir 重启（如 Termux 会话重开）时会先掐一下 app 之前起的桥再接管，SSE 会重连一次。
+
+两层自愈的关系：runsv 管「Termux 会话/应用还在」时的秒级重启；watchdog 管「runsvdir 自己没了」
+（Termux 被系统杀掉、设备重启后没人打开 Termux）——它会直起桥，等 runsvdir 回来后由服务收归。
+两层都只是调 `start-bridge.sh`，不各自记 PID。
 
 `pi-pocket-start` 是给 **app 的 `com.termux.RUN_COMMAND`**（以及手工/SSH）用的启动器：占 wake lock → 加载并持久化
 token/bind → 设默认 cwd → `exec pi-pocket-bridge`，日志在 `~/.pi/agent/pi-pocket-start.log`。app 侧需要两件事才能用这条路：

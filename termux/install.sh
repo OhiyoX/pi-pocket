@@ -41,6 +41,31 @@ fi
 cp "$ROOT/termux/pi-pocket-start" "$BIN/pi-pocket-start"
 chmod 755 "$BIN/pi-pocket-start"
 
+# ── 服务化（termux-services / runsv）+ home 侧兜底入口 ────────────────────────
+# 桥以前靠 job-scheduler 每 15 分钟一次的 watchdog 拉（Android 最小周期），runsv 是秒级重启。
+# 这里只落文件，**不自动 sv up / sv restart**：装的过程中不该掐断正在跑的会话，
+# 何时（重）启动由调用方决定（termux/bootstrap.sh 会 FORCE=1 调 start-bridge.sh）。
+AGENT="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}"
+mkdir -p "$AGENT/bin" "$HOME/.termux/boot"
+install -m 755 "$ROOT/termux/start-bridge.sh" "$AGENT/start-bridge.sh"
+install -m 755 "$ROOT/termux/pi-pocket-watchdog.sh" "$AGENT/bin/pi-pocket-watchdog.sh"
+install -m 700 "$ROOT/termux/boot/start-pocket" "$HOME/.termux/boot/start-pocket"
+echo "installed: $AGENT/start-bridge.sh"
+echo "installed: $AGENT/bin/pi-pocket-watchdog.sh   # job-scheduler 8899 兜底"
+echo "installed: $HOME/.termux/boot/start-pocket   # Termux:Boot 开机自启"
+SVDIR="${SVDIR:-${PREFIX:-}/var/service}"
+if [ -n "${PREFIX:-}" ] && [ -d "$SVDIR" ] && command -v sv >/dev/null 2>&1 && [ -d "$ROOT/termux/service/pi-pocket" ]; then
+  mkdir -p "$SVDIR/pi-pocket"
+  install -m 755 "$ROOT/termux/service/pi-pocket/run" "$SVDIR/pi-pocket/run"
+  if [ -e "$SVDIR/pi-pocket/down" ]; then
+    echo "service:  $SVDIR/pi-pocket 已装（保留 down 标记 = 仍停用；sv-enable pi-pocket 启用）"
+  else
+    echo "service:  $SVDIR/pi-pocket 已装（sv status|up|restart pi-pocket）"
+  fi
+else
+  echo "service:  跳过（没有 termux-services 或非 Termux 环境；用 start-bridge.sh 直起）"
+fi
+
 # droid（手机操作工具箱）：仓内 shebang 是 `#!/usr/bin/env python3`，而 Termux/Android **没有**
 # /usr/bin/env ⇒ 装完不改就报 `bad interpreter: No such file or directory`。和桥一样改成 $PREFIX/bin/env。
 if [ -f "$ROOT/termux/tools/droid/droid" ]; then

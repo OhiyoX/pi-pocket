@@ -45,8 +45,9 @@ The launcher refuses to start a non-loopback bind without a token. HTTP is plain
 | GET | `/v1/tree` | — | Session tree projection |
 | POST | `/v1/fork` | — | Fork the session and rebind the worker |
 | POST | `/v1/export` | — | Export HTML and return the artifact path |
+| POST | `/v1/restart` | — | Restart through `start-bridge.sh` (`sv restart` when supervised) |
 
-Additional endpoints (providers, app profile, device, SSH hosts, file operations, reload/restart) are documented in `termux/README.md`.
+Additional endpoints (providers, app profile, device, SSH hosts, file operations, reload) are documented in `termux/README.md`. `/v1/restart` is also there; it delegates to `start-bridge.sh` so the service and watchdog keep a single restart path.
 
 ## SSE events
 

@@ -1,3 +1,24 @@
+## 2026-10-24 · 桥改成「服务」：崩了秒级自愈，不再等 15 分钟
+
+你会看到什么：
+
+- Termux 上的桥现在由 **termux-services（runsv）** 监督：进程被系统杀掉/OOM/自己崩，**秒级**被拉回来
+  （以前只有 termux-job-scheduler 每 15 分钟跑一次的 watchdog，Android 最小周期就那样）。
+- 管它用 `sv`：`sv status pi-pocket` / `sv restart pi-pocket` / `sv down pi-pocket`。
+  要**长期停用**就用 `sv-disable pi-pocket`（写 down 标记，watchdog 不会偷偷拉回；`sv-enable` 恢复）。
+  单跑 `sv down` 只是临时停，watchdog 会在 15 分钟内按保活把它拉回来 —— 这是有意分工。
+- 开机（装了 Termux:Boot）先起 runsvdir，再 `sv up pi-pocket`；Termux 应用被系统杀掉时仍由 watchdog 兜底。
+- app 的「强制重启桥」与桥的 `POST /v1/restart` 都改走 `start-bridge.sh`：有服务就 `sv restart`，没服务才直起。
+
+为什么改：用户 2026-10-24「pi pocket 的桥做成服务吧」。原来靠 `termux-job-scheduler` job 8899 每 15 分钟探一次，
+桥崩了最多 15 分钟才回来（且 job 会在重装/升级后悄悄丢）。runsv 在 Termux 里已有（sshd 就是这么跑的）。
+
+顺手修掉的债：`start-bridge.sh` 不再用 `pkill -f 'bin/pi-pocket-bridge$'` 做命令行名称匹配（
+`docs/AUDIT-2026-10-23.md` 第 143 条记的正是这条），直起路径交给启动器按 `/proc` 核实的精确 PID 收归。
+
+怎么试：`sv status pi-pocket` → `run:`；`kill -9 <桥 pid>` 后 1–3 s 内新 pid 起来、`/v1/health` 200；
+`sv restart pi-pocket` 换进程；`sv down pi-pocket` 停住不再自拉，`sv-enable pi-pocket` 恢复。
+
 ## 2026-10-24 · 工具卡不再把图塞进来，只留一行「查看图片」
 
 你会看到什么：
