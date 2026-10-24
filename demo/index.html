@@ -99,8 +99,8 @@
         <article class="feature">
           <div class="feature-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="3"/><path d="M10 18h4"/></svg></div>
           <h3><span class="i18n-en">Runs on the phone</span><span class="i18n-zh">就在手机里跑</span></h3>
-          <p class="i18n-en">Termux hosts the bridge and a real <code>pi</code> process. The app connects to <code>127.0.0.1</code> — no laptop in the loop.</p>
-          <p class="i18n-zh">Termux 承载桥和真正的 <code>pi</code> 进程，app 连接 <code>127.0.0.1</code>，不需要一台电脑中转。</p>
+          <p class="i18n-en">Termux hosts the bridge and a real <code>pi</code> process. The app connects to <code>127.0.0.1</code> — no laptop in the loop. The bridge runs under <code>runsv</code> with a watchdog fallback.</p>
+          <p class="i18n-zh">Termux 承载桥和真正的 <code>pi</code> 进程，app 连接 <code>127.0.0.1</code>，不需要一台电脑中转；桥由 <code>runsv</code> 监督，另有 watchdog 兜底。</p>
         </article>
         <article class="feature">
           <div class="feature-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h13"/></svg></div>
@@ -214,8 +214,8 @@
           <div class="arch-arrow">⇄</div>
           <div class="arch-box"><b>~/.pi/agent/sessions</b><span class="i18n-en">one JSONL per session</span><span class="i18n-zh">每个会话一个 JSONL</span></div>
         </div>
-        <p class="arch-note i18n-en">The bridge can also live on a LAN or Tailscale host. The app probes loopback first, then the current /24, then saved machines. If the bridge is down, the app can SSH in and start it.</p>
-        <p class="arch-note i18n-zh">桥也可以跑在局域网或 Tailscale 主机上。app 先探测本机，再扫当前 /24，最后试已保存机器；桥没起时可以 SSH 进去拉起。</p>
+        <p class="arch-note i18n-en">The bridge can also live on a LAN or Tailscale host. The app probes loopback first, then the current /24, then saved machines. If the bridge is down, the app can SSH in and start it. On Termux it runs as a <code>runsv</code> service; a 15-minute watchdog covers <code>runsvdir</code> loss.</p>
+        <p class="arch-note i18n-zh">桥也可以跑在局域网或 Tailscale 主机上。app 先探测本机，再扫当前 /24，最后试已保存机器；桥没起时可以 SSH 进去拉起。Termux 上桥是 <code>runsv</code> 服务，<code>runsvdir</code> 不在时由 15 分钟 watchdog 兜底。</p>
       </div>
 
       <table class="proto-table" style="margin-top:22px">
@@ -248,12 +248,11 @@
         <div class="code-card">
           <div class="code-head"><span><span class="i18n-en">1 · Termux bridge</span><span class="i18n-zh">1 · Termux 桥</span></span><button class="copy" type="button" data-copy="code-termux"><span class="i18n-en">Copy</span><span class="i18n-zh">复制</span></button></div>
           <pre id="code-termux"><span class="c"># inside Termux</span>
-pkg install nodejs git
+pkg install nodejs git termux-services
 git clone https://github.com/OhiyoX/pi-pocket.git
 <span class="k">cd</span> pi-pocket
 ./termux/install.sh
-termux-wake-lock
-nohup pi-pocket-bridge &gt;&gt; ~/.pi/agent/pi-pocket-bridge.log 2&gt;&amp;1 &amp;
+sv up pi-pocket
 
 <span class="c"># verify</span>
 curl -s localhost:8789/v1/health</pre>
@@ -316,6 +315,7 @@ allow-external-apps=true</pre>
           <div class="status-line"><span><span class="i18n-en">Min Android</span><span class="i18n-zh">最低 Android</span></span><span>9 · API 28</span></div>
           <div class="status-line"><span><span class="i18n-en">Target</span><span class="i18n-zh">目标版本</span></span><span>API 36</span></div>
           <div class="status-line"><span><span class="i18n-en">Bridge</span><span class="i18n-zh">桥</span></span><span>Node 20+ · no deps</span></div>
+          <div class="status-line"><span><span class="i18n-en">Supervision</span><span class="i18n-zh">监督</span></span><span>runsv + watchdog</span></div>
           <div class="status-line"><span><span class="i18n-en">License</span><span class="i18n-zh">许可证</span></span><span>MIT</span></div>
           <div class="status-line"><span><span class="i18n-en">Snapshot</span><span class="i18n-zh">快照</span></span><span>2026-10-25</span></div>
         </div>
