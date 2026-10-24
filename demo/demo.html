@@ -24,6 +24,7 @@
       <a href="index.html"><span class="i18n-en">Home</span><span class="i18n-zh">首页</span></a>
       <a href="index.html#features"><span class="i18n-en">Features</span><span class="i18n-zh">功能</span></a>
       <a href="index.html#architecture"><span class="i18n-en">Architecture</span><span class="i18n-zh">架构</span></a>
+      <a href="index.html#supervision"><span class="i18n-en">Supervision</span><span class="i18n-zh">监督</span></a>
       <a href="index.html#install"><span class="i18n-en">Install</span><span class="i18n-zh">安装</span></a>
       <button class="lang-toggle" id="langToggle" type="button" aria-label="切换到中文"><span id="langToggleLabel">中文</span></button>
       <button class="icon-button" id="siteTheme" type="button" aria-label="Switch theme">
@@ -215,19 +216,19 @@
       <div class="screen-copy">
         <span class="num">07</span>
         <h2><span class="i18n-en">Switch machines, wake one over SSH</span><span class="i18n-zh">切换机器，SSH 唤醒</span></h2>
-        <p class="i18n-en">Loopback, LAN and Tailscale hosts in one picker. The app merges multiple routes to the same host, remembers the best path, reads SSH config, and can bootstrap a blank Termux from zero.</p>
-        <p class="i18n-zh">本机、局域网与 Tailscale 主机都在一个面板里；同一台机器的多条路径会合并，记住最优路径，读取 SSH 配置，还能从零部署空白 Termux。</p>
+        <p class="i18n-en">Loopback, LAN and Tailscale hosts in one picker. The app merges multiple routes to the same host, remembers the best path, reads SSH config, and can bootstrap a blank Termux from zero. On Termux the bridge is installed as a runsv service, with a watchdog fallback.</p>
+        <p class="i18n-zh">本机、局域网与 Tailscale 主机都在一个面板里；同一台机器的多条路径会合并，记住最优路径，读取 SSH 配置，还能从零部署空白 Termux。Termux 上桥会装成 runsv 服务，并由 watchdog 兜底。</p>
         <ul class="notice-list i18n-en">
           <li>Bridge URL, token state and reachability</li>
           <li>Scan loopback and the current subnet</li>
           <li>Read host SSH config or the bridge host's config</li>
-          <li>Bootstrap a blank Termux and start the bridge</li>
+          <li>Bootstrap a blank Termux, then let runsv supervise the bridge</li>
         </ul>
         <ul class="notice-list i18n-zh">
           <li>显示桥地址、token 状态与可达性</li>
           <li>扫描本机与当前网段</li>
           <li>读取手机或桥主机的 SSH 配置</li>
-          <li>空白 Termux 一键部署并起桥</li>
+          <li>空白 Termux 一键部署，桥交给 runsv 监督</li>
         </ul>
       </div>
     </article>

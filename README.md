@@ -17,6 +17,18 @@ The bridge can also run as a supervised Termux service: `runsv` restarts it in s
 
 ![Weekly review in Pocket Pi](demo/screenshots/02-chat-markdown.png)
 
+## Screens / 界面
+
+| | |
+| --- | --- |
+| <img src="demo/screenshots/01-sessions-dark.png" width="280" alt="Session list grouped by project"><br>**Sessions** · grouped by project<br>**会话** · 按项目分组 | <img src="demo/screenshots/02-chat-markdown.png" width="280" alt="Chat with thinking, tools and Markdown"><br>**Chat** · thinking, tools, Markdown<br>**对话** · 思考、工具与 Markdown |
+| <img src="demo/screenshots/03-tool-cards.png" width="280" alt="Tool cards with success and failure states"><br>**Tools** · success and failure states<br>**工具卡** · 成功与失败状态 | <img src="demo/screenshots/04-tables-mermaid.png" width="280" alt="Markdown tables and a Mermaid diagram"><br>**Markdown** · tables and Mermaid<br>**Markdown** · 表格与 Mermaid |
+| <img src="demo/screenshots/05-context.png" width="280" alt="Context usage popover"><br>**Context** · tokens, cache and spend<br>**上下文** · token、缓存与花费 | <img src="demo/screenshots/07-machines.png" width="280" alt="Machine picker with LAN, Tailscale and Termux actions"><br>**Machines** · LAN, Tailscale, SSH wake<br>**机器** · 局域网、Tailscale、SSH 拉起 |
+| <img src="demo/screenshots/08-shell.png" width="280" alt="Shell on the connected host"><br>**Shell** · run commands on the host<br>**Shell** · 在主机上执行命令 | <img src="demo/screenshots/09-sessions-light.png" width="280" alt="Light theme session list"><br>**Light theme** · follow system or force<br>**浅色主题** · 跟随系统或强制 |
+
+<sub>All screenshots are synthetic, captured from the Android debug build (0.4.4 / code 23) against `tools/mock-bridge.mjs` at 100% font scale. / 所有截图均为合成数据，来自 Android debug 构建（0.4.4 / code 23）连接 `tools/mock-bridge.mjs` 的实拍，100% 字号。</sub>
+
+
 ## Why another client
 
 The terminal is the engine; the phone is the interface. Pocket Pi does not reimplement the agent. It gives pi a native mobile surface while sessions, tools and prompts stay where they already live.

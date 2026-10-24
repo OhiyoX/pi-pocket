@@ -27,6 +27,7 @@
       <a href="#features"><span class="i18n-en">Features</span><span class="i18n-zh">功能</span></a>
       <a href="demo.html"><span class="i18n-en">Screenshot tour</span><span class="i18n-zh">截图导览</span></a>
       <a href="#architecture"><span class="i18n-en">Architecture</span><span class="i18n-zh">架构</span></a>
+      <a href="#supervision"><span class="i18n-en">Supervision</span><span class="i18n-zh">监督</span></a>
       <a href="#install"><span class="i18n-en">Install</span><span class="i18n-zh">安装</span></a>
       <button class="lang-toggle" id="langToggle" type="button" aria-label="切换到中文"><span id="langToggleLabel">中文</span></button>
       <button class="icon-button" id="siteTheme" type="button" aria-label="Switch theme">
@@ -232,6 +233,58 @@
           <tr><td>GET /v1/info · models · commands</td><td><span class="i18n-en">Model, context, slash commands and capabilities</span><span class="i18n-zh">模型、上下文、斜杠命令与能力</span></td></tr>
         </tbody>
       </table>
+    </div>
+  </section>
+
+  <!-- ================= SUPERVISION ================= -->
+  <section class="section" id="supervision">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow"><span class="i18n-en">Supervision</span><span class="i18n-zh">桥的监督</span></p>
+        <h2>
+          <span class="i18n-en">A crash is a restart.<br>Seconds, not minutes.</span>
+          <span class="i18n-zh">崩了就重启，<br>是秒级，不是 15 分钟。</span>
+        </h2>
+        <p class="i18n-en">On Termux the bridge is a <code>runsv</code> service. If it dies, runsv brings it back in seconds. A 15-minute watchdog covers the case where the service directory itself is gone.</p>
+        <p class="i18n-zh">在 Termux 上，桥是 <code>runsv</code> 服务：进程挂了，runsv 秒级拉回；服务目录本身不在时，由 15 分钟一次 watchdog 兜底。</p>
+      </div>
+
+      <div class="feature-grid">
+        <article class="feature">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"/></svg></div>
+          <h3><span class="i18n-en">runsv · termux-services</span><span class="i18n-zh">runsv · termux-services</span></h3>
+          <p class="i18n-en">Crash, OOM or <code>kill -9</code>: a new process starts in seconds. <code>sv status</code> is the source of truth.</p>
+          <p class="i18n-zh">崩溃、OOM 或 <code>kill -9</code>，新进程秒级起来；<code>sv status</code> 就是状态事实源。</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></div>
+          <h3><span class="i18n-en">15-minute watchdog</span><span class="i18n-zh">15 分钟 watchdog</span></h3>
+          <p class="i18n-en">If <code>runsvdir</code> is gone — Termux killed by Android, reboot before Termux opens — the watchdog calls the same start path.</p>
+          <p class="i18n-zh">如果 <code>runsvdir</code> 不在——Termux 被系统杀掉、重启后还没打开 Termux——watchdog 会走同一条启动路径。</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h11M4 12h7M4 17h11M17 10l3 2-3 2"/></svg></div>
+          <h3><span class="i18n-en">One start path</span><span class="i18n-zh">一个启动入口</span></h3>
+          <p class="i18n-en"><code>start-bridge.sh</code> is idempotent: <code>sv</code> when supervised, direct start otherwise. <code>sv down</code> is temporary; <code>sv-disable</code> is respected.</p>
+          <p class="i18n-zh"><code>start-bridge.sh</code> 幂等：有服务用 <code>sv</code>，没有才直起；<code>sv down</code> 只是临时停，<code>sv-disable</code> 会被尊重。</p>
+        </article>
+      </div>
+
+      <table class="proto-table" style="margin-top:22px">
+        <thead><tr><th><span class="i18n-en">Command</span><span class="i18n-zh">命令</span></th><th><span class="i18n-en">What it does</span><span class="i18n-zh">作用</span></th></tr></thead>
+        <tbody>
+          <tr><td>sv status pi-pocket</td><td><span class="i18n-en">Show the supervised process</span><span class="i18n-zh">查看监督状态</span></td></tr>
+          <tr><td>sv restart pi-pocket</td><td><span class="i18n-en">Replace the process (install / update)</span><span class="i18n-zh">换进程（安装 / 更新）</span></td></tr>
+          <tr><td>sv down pi-pocket</td><td><span class="i18n-en">Temporary stop; the watchdog may revive it</span><span class="i18n-zh">临时停；watchdog 可能拉回</span></td></tr>
+          <tr><td>sv-disable pi-pocket</td><td><span class="i18n-en">Long stop; respected by the watchdog and start-bridge</span><span class="i18n-zh">长期停用；watchdog 与启动器都尊重</span></td></tr>
+          <tr><td>sv-enable pi-pocket</td><td><span class="i18n-en">Clear the down marker and hand it back to runsv</span><span class="i18n-zh">清除停用标记，交回 runsv</span></td></tr>
+          <tr><td>FORCE=1 start-bridge.sh</td><td><span class="i18n-en">Force restart; clears the down marker first</span><span class="i18n-zh">强制重启；先清停用标记</span></td></tr>
+        </tbody>
+      </table>
+      <p class="capture-note">
+        <span class="i18n-en"><strong>The two stops are different.</strong> <code>sv down</code> stops the process but lets the watchdog/kick path revive it. <code>sv-disable</code> writes a persistent down marker; only <code>sv-enable</code> or an explicit forced restart brings it back.</span>
+        <span class="i18n-zh"><strong>两个“停”不一样。</strong><code>sv down</code> 只停进程，watchdog / 下次拉起仍可能恢复；<code>sv-disable</code> 写持久 down 标记，只有 <code>sv-enable</code> 或显式强制重启才会恢复。</span>
+      </p>
     </div>
   </section>
 
